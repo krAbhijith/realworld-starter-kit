@@ -8,7 +8,7 @@ exports.register = async (req, res) => {
     await user.save();
     res.status(200).send({ message: 'User registered successfully' });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send(error.errmsg);
   }
 };
 
@@ -22,7 +22,9 @@ exports.login = async (req, res) => {
     if (!isPasswordMatch) {
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
-    const token = jwt.sign({ _id: user._id }, "Hello_World");
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    user.token = token;
+    await user.save();
     res.send({  token });
   } catch (error) {
     res.status(400).send(error);

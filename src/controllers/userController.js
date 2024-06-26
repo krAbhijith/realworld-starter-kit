@@ -23,15 +23,16 @@ exports.updateUser = async (req, res) => {
   try{
     if (req.body.password){
         req.body.password = await bcrypt.hash(req.body.password, 8);
-
-        const user = await User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true });
-
-        if (!user){
-            return res.status(400).send({ error: "User not found" });
-        }
-
-        res.send({ user })
     }
+
+    const user = await User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true });
+
+    if (!user){
+        return res.status(400).send({ error: "User not found" });
+    }
+
+    res.status(200).send({ user: user })
+    
   }catch(err) {
     console.error("Error in update:", err);
     res.status(500).send({ error: 'internal server error' });

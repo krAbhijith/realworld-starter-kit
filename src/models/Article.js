@@ -20,8 +20,7 @@ const articleSchema = new mongoose.Schema({
     required: true
   },
   tagList: [{
-    type: String,
-    required: true
+    type: String
   }],
   favorited: {
     type: Boolean,
@@ -64,13 +63,13 @@ articleSchema.methods.toArticleResponse = function(user) {
     tagList: this.tagList,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
-    favorited: user ? user.favorites.includes(this._id) : false,
+    favorited: user ? user.favoritesList.includes(this._id) : false,
     favoritesCount: this.favoritesCount,
     author: this.author ? {
       username: this.author.username,
       bio: this.author.bio,
       image: this.author.image,
-      following: user ? user.following.includes(this.author._id) : false
+      following: user ? user.followingList.includes(this.author._id) : false
     } : null
   };
 };

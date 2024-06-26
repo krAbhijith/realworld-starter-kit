@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const Article = require('../models/Article')
 
 const userSchema = new mongoose.Schema({
     token: {type: String, required: false},
@@ -10,6 +11,7 @@ const userSchema = new mongoose.Schema({
     image: {type: String, required: false, default: null},
     followingList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
     followersList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+    favoritesList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article'}],
 });
 
 userSchema.methods.toJSON = function(){
@@ -21,6 +23,7 @@ userSchema.methods.toJSON = function(){
   delete userObj._id;
   delete userObj.followingList;
   delete userObj.followersList;
+  delete userObj.favoritesList;
 
   return userObj
 };

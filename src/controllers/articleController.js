@@ -1,0 +1,96 @@
+// controllers/articleController.js
+const { default: slugify } = require('slugify');
+const Article = require('../models/Article');
+const User = require('../models/User');
+
+exports.createArticle = async (req, res) => {
+  try {
+    const { title, description, body, tagList } = req.body.article;
+    
+    if (!title) {
+      return res.status(400).json({ errors: { title: "can't be blank" } });
+    }
+    
+    if (!description) {
+      return res.status(400).json({ errors: { description: "can't be blank" } });
+    }
+    
+    if (!body) {
+      return res.status(400).json({ errors: { body: "can't be blank" } });
+    }
+
+    const article = new Article({
+      title,
+      description,
+      body,
+      tagList: tagList || [],
+      author: req.user._id  // Assuming req.user is set by auth middleware
+    });
+    
+    await article.save();
+    
+    // Populate author details
+    await article.populate('author', 'username bio image');
+
+    // Format the response
+    const articleResponse = article.toArticleResponse(req.user);
+
+    res.status(201).json({ article: articleResponse });
+  } catch (error) {
+    console.error('Error in createArticle:', error);
+    res.status(500).json({ errors: { body: ['Could not create article', error.message] } });
+  }
+};
+
+
+exports.updateArticle= async (req, res) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ['title', 'description', 'body'];
+  const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
+  const querySlug = req.params.slug;
+
+
+  if (!isValidUpdate) {
+    return res.status(400).send({ error: "Invalid Update" });
+  }
+
+  try {
+    if (req.body.title) {
+      slug = slugify(req.body.title, { lower: true, strict: true });
+      req.body.slug = slug;
+    }
+
+    const article = await Article.findOneAndUpdate({slug: querySlug}, req.body, {new: true, runValidators: true});
+
+    if (!article) {
+      return res.status(400).send({ error: 'Article not found' });
+    }
+    
+    await article.populate('author', "username bio image")
+    const articleResponse = article.toArticleResponse(req.user);
+
+    res.status(200).send({ article: articleResponse})
+
+  } catch (error) {
+    return res.status(400).send({ error: "Internal Server error" });
+  }
+
+};
+
+exports.getArticle = async (req, res) => {
+  const slug = req.params.slug;
+  try {
+    const article = await Article.findOne({ slug: req.params.slug});
+    if(!article) {
+      return res.status(400).send({ error: 'Article not found' });
+    }
+
+    await article.populate('author', "username bio image")
+    const articleResponse = article.toArticleResponse(req.user);
+
+    res.status(200).send({ article: articleResponse});
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send({ error: "Internal Server error" });
+  }
+}

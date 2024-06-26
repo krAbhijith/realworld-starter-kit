@@ -176,10 +176,9 @@ exports.listArticles = async (req, res) => {
       query.tagList = tag;
     }
     if (author){
+      console.log(author);
       const user = await User.findOne({ username: author });
-      if (user){
-        query.author = user._id;
-      }
+      query.author = user ? user._id : null;
     }
 
     if (favorited){
@@ -195,6 +194,7 @@ exports.listArticles = async (req, res) => {
       .sort({ createdAt: 'desc'})
       .populate('author', "username bio image");
 
+      console.log(query);
     const countPromise = Article.countDocuments(query);
 
     const [ articles, articlesCount ] = await Promise.all([articlePromsie, countPromise]);

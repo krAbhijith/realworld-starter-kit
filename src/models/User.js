@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const Article = require('../models/Article')
 
 const userSchema = new mongoose.Schema({
     token: {type: String, required: false},

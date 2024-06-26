@@ -194,7 +194,6 @@ exports.listArticles = async (req, res) => {
       .sort({ createdAt: 'desc'})
       .populate('author', "username bio image");
 
-      console.log(query);
     const countPromise = Article.countDocuments(query);
 
     const [ articles, articlesCount ] = await Promise.all([articlePromsie, countPromise]);
@@ -250,5 +249,30 @@ exports.deleteArticle = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(400).send({error: error});
+  }
+};
+
+
+exports.getTags = async (req, res) => {
+  try {
+    // Aggregate to get unique tags
+    const tags = await Article.aggregate([
+      // Unwind the tagList array
+      { $unwind: "$tagList" },
+      // Group by tags and get unique ones
+      { $group: { _id: "$tagList" } },
+      // Sort alphabetically
+      { $sort: { _id: 1 } },
+      // Project to reshape the output
+      { $project: { _id: 0, tag: "$_id" } }
+    ]);
+
+    // Extract tags from the result
+    const tagList = tags.map(t => t.tag);
+
+    res.json({ tags: tagList });
+  } catch (error) {
+    console.error('Error fetching tags:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

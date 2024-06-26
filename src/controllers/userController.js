@@ -68,7 +68,7 @@ exports.follow = async (req, res) => {
         return res.status(400).send({ error: "User not found" });
       }
 
-      if (follower === usernameToFollow){
+      if (follower.username === usernameToFollow){
         return res.status(400).send({ error: "You canot follow yourself" });
       }
 
@@ -110,7 +110,7 @@ exports.unfollow = async (req, res) => {
             return res.status(400).send({ error: "User not found" });
         }
 
-        if (follower === usernameToUnfollow){
+        if (follower.username === usernameToUnfollow){
             return res.status(400).send({ error: "You canot follow yourself" });
         }
           

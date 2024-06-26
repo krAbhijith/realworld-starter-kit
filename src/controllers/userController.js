@@ -12,7 +12,7 @@ exports.getUser = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  const updates =  Object.keys(req.body);
+  const updates =  Object.keys(req.body.user);
   const allowedUpdates = ['username', 'email', 'password', 'bio', 'image'];
   const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
 
@@ -21,11 +21,11 @@ exports.updateUser = async (req, res) => {
   }
 
   try{
-    if (req.body.password){
-        req.body.password = await bcrypt.hash(req.body.password, 8);
+    if (req.body.user.password){
+        req.body.user.password = await bcrypt.hash(req.body.user.password, 8);
     }
 
-    const user = await User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true });
+    const user = await User.findByIdAndUpdate(req.user._id, req.body.user, { new: true, runValidators: true });
 
     if (!user){
         return res.status(400).send({ error: "User not found" });
@@ -34,8 +34,7 @@ exports.updateUser = async (req, res) => {
     res.status(200).send({ user: user })
     
   }catch(err) {
-    console.error("Error in update:", err);
-    res.status(500).send({ error: 'internal server error' });
+    res.status(500).send({ error: `internal server error`});
   }
 };
 
@@ -48,7 +47,9 @@ exports.showProfile =  async (req, res) => {
             return res.status(404).send({ error: "User not found" });
         }
 
-        res.status(200).send({ profile: {user} });
+        user.following = user.followingList.includes({_id: req.user._id});
+
+        res.status(200).send({ profile: user });
     }catch (error) {
         console.log("Error in showProfile", error);
         res.status(500).send({ error: 'internal server error' });

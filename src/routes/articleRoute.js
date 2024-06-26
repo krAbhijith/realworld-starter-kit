@@ -17,7 +17,7 @@ router.delete('/:slug/favorite', auth, UnfavoriteArticle);
 
 // Routes for Comments
 
-router.get('/:slug/comments', auth, getComment);
+router.get('/:slug/comments', optionalAuth, getComment);
 router.post('/:slug/comments', optionalAuth, createComment);
 router.delete('/:slug/comments/:id', auth, deleteComment);
 

@@ -4,28 +4,31 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   try {
-    const user = new User(req.body);
+    const user = new User(req.body.user);
     await user.save();
-    res.status(200).send({ message: 'User registered successfully' });
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    user.token = token;
+    await user.save();
+    return res.status(200).send({ user: user });
   } catch (error) {
-    res.status(400).send(error.errmsg);
+    res.status(400).send(error.message);
   }
 };
 
 exports.login = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.user.email });
     if (!user) {
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
-    const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
+    const isPasswordMatch = await bcrypt.compare(req.body.user.password, user.password);
     if (!isPasswordMatch) {
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
     user.token = token;
     await user.save();
-    res.send({  token });
+    res.status(200).send({ user: user });
   } catch (error) {
     res.status(400).send(error);
   }

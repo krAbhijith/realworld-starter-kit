@@ -4,7 +4,7 @@ const User = require("../models/User");
 
 exports.createComment = async (req, res) => {
     try {
-        const comment = new Comment(req.body);
+        const comment = new Comment(req.body.comment);
         comment.author = req.user._id;
 
         articleCommented = await Article.findOne({ slug: req.params.slug });

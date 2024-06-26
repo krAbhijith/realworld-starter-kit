@@ -5,7 +5,7 @@ const User = require('../models/User');
 
 exports.createArticle = async (req, res) => {
   try {
-    const { title, description, body, tagList } = req.body;
+    const { title, description, body, tagList } = req.body.article;
     
     if (!title) {
       return res.status(400).json({ errors: { title: "can't be blank" } });
@@ -44,7 +44,7 @@ exports.createArticle = async (req, res) => {
 
 
 exports.updateArticle= async (req, res) => {
-  const updates = Object.keys(req.body);
+  const updates = Object.keys(req.body.article);
   const allowedUpdates = ['title', 'description', 'body'];
   const isValidUpdate = updates.every(update => allowedUpdates.includes(update));
   const querySlug = req.params.slug;
@@ -55,12 +55,12 @@ exports.updateArticle= async (req, res) => {
   }
 
   try {
-    if (req.body.title) {
-      slug = slugify(req.body.title, { lower: true, strict: true });
-      req.body.slug = slug;
+    if (req.body.article.title) {
+      slug = slugify(req.body.article.title, { lower: true, strict: true });
+      req.body.article.slug = slug;
     }
 
-    const article = await Article.findOneAndUpdate({slug: querySlug}, req.body, {new: true, runValidators: true});
+    const article = await Article.findOneAndUpdate({slug: querySlug}, req.body.article, {new: true, runValidators: true});
 
     if (!article) {
       return res.status(404).send({ error: 'Article not found' });
@@ -176,7 +176,6 @@ exports.listArticles = async (req, res) => {
       query.tagList = tag;
     }
     if (author){
-      console.log(author);
       const user = await User.findOne({ username: author });
       query.author = user ? user._id : null;
     }

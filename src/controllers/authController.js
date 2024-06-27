@@ -25,9 +25,6 @@ exports.login = async (req, res) => {
     if (!isPasswordMatch) {
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-    user.token = token;
-    await user.save();
     res.status(200).send({ user: user });
   } catch (error) {
     res.status(400).send(error);

@@ -23,8 +23,17 @@ userSchema.methods.toJSON = function(){
   delete userObj.followingList;
   delete userObj.followersList;
   delete userObj.favoritesList;
-
+  
   return userObj
+};
+
+userSchema.methods.toProfile = function (user) {
+  return {
+    username: this.username,
+    bio: this.bio,
+    image: this.image,
+    following: user ? user.followingList.includes(this._id) : false
+  };
 };
 
 userSchema.pre('save', async function(next) {

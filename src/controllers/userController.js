@@ -38,7 +38,7 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-exports.showProfile =  async (req, res) => {
+exports.getProfile =  async (req, res) => {
     try {
         const username = req.params.username;
         const user = await User.findOne({ username });
@@ -47,9 +47,9 @@ exports.showProfile =  async (req, res) => {
             return res.status(404).send({ error: "User not found" });
         }
 
-        user.following = user.followingList.includes({_id: req.user._id});
+        const profileResponse = user.toProfile(req.user);
 
-        res.status(200).send({ profile: user });
+        res.status(200).send({ profile: profileResponse });
     }catch (error) {
         console.log("Error in showProfile", error);
         res.status(500).send({ error: 'internal server error' });
